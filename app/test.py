@@ -4,6 +4,7 @@ import pandas as pd
 from selenium import webdriver
 import time
 
+
 def count_line(fp):
     d = pd.read_csv(fp)
     print(d.shape)

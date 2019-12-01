@@ -15,10 +15,10 @@ class BaseHandler(object):
     def __init__(self, result_dir='../data'):
         print(os.path.abspath(result_dir))
         assert os.path.exists(os.path.abspath(result_dir))
-        self.browser = webdriver.Chrome()
+        self.browser = webdriver.Chrome('C:\\Users\\wwdor\\webdriver\\chromedriver.exe')
         self.browser.minimize_window()
         self.start_url = ''
-        self.keyword ='验证码'
+        self.keyword = '验证码'
         self.result_dir = os.path.abspath(result_dir)
         self.result = dict({'project_name': 'DEMO'})
         self.set_params()
