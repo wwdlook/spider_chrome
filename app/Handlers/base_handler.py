@@ -5,14 +5,18 @@ import sys
 import json
 import time
 import random
+import traceback
+import newspaper as npp
 from selenium import webdriver
 # from app.common.utils import callback
 
 
 class BaseHandler(object):
     def __init__(self, result_dir='../data'):
+        print(os.path.abspath(result_dir))
         assert os.path.exists(os.path.abspath(result_dir))
         self.browser = webdriver.Chrome()
+        self.browser.minimize_window()
         self.start_url = ''
         self.keyword ='验证码'
         self.result_dir = os.path.abspath(result_dir)
@@ -38,12 +42,13 @@ class BaseHandler(object):
             tmp_url = self.browser.current_url
             if tmp_url != last_url:
                 print('Verification DONE')
-                break
+                return True
             else:
                 tmptime = time.time()
                 if tmptime - stime > 10:
-                    print('TIME OUT, PLEASE RETRY !')
-                    break
+                    print('Verification TIME OUT, PLEASE RETRY !')
+                    return False
+        return True
 
     def get(self, url, **kwargs):
         """
@@ -52,6 +57,17 @@ class BaseHandler(object):
         :param kwargs: callback: give the next parser
         :return: the next parser
         """
+        if "time_interval" in kwargs:
+            time_interval = kwargs["time_interval"]
+            kwargs.pop("time_interval")
+        else:
+            time_interval = (0.5, 2.0)
+
+        assert type(time_interval) is tuple
+        try:
+            time_wait = random.uniform(time_interval[0], time_interval[1])
+        except:
+            time_wait = random.uniform(0.5, 2)
         if kwargs.get('callback'):
             callback = kwargs['callback']
             if isinstance(callback, str) and hasattr(self, callback):
@@ -60,10 +76,10 @@ class BaseHandler(object):
                 func = callback
             kwargs.pop('callback')
         else:
-            self.browser.close()
-            print('Please set the next parser function !')
-            self.save_result('temp_result')
-            sys.exit()
+            self.browser.get(url)
+            time.sleep(time_wait)
+            return None
+            # sys.exit()
 
         if url != '':
             flag = True
@@ -73,10 +89,34 @@ class BaseHandler(object):
                     assert url == self.browser.current_url
                     flag = False
                 except:
-                    self.manual_verification(url)
-            time.sleep(random.uniform(0.5, 2))
+                    if self.manual_verification(url):
+                        break
+            time.sleep(time_wait)
 
-        return func(**kwargs)
+        func(**kwargs)
+
+    def get_doc(self, url, time_out=5):
+        """
+        request url by GET method and then get doc content
+        if page's loading time exceeds `time_out`(default=5) seconds then return 'TIME OUT, url: url'
+        :param url:
+        :param time_out: int(default=5)
+        :return: str
+        """
+        self.get(url)
+        last_page = self.browser.page_source
+        time.sleep(0.1)
+        time0 = time.time()
+        while self.browser.page_source != last_page:
+            if time.time() - time0 > time_out:
+                return 'TIME OUT, url: %s' % url
+            time.sleep(0.5)
+            last_page = self.browser.page_source
+
+        a = npp.Article(self.browser.current_url, language='zh')
+        a.download(input_html=self.browser.page_source)
+        a.parse()
+        return a.text
 
     def save_result(self, fname='default_result'):
         """

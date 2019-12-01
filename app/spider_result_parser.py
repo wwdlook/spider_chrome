@@ -172,8 +172,20 @@ def json_parser(fp, key_names):
                 f.writelines(res)
 
 
+def json_parser1(fp, key_names):
+    with open(fp, 'r') as f:
+        keywords = json.load(f)
+    for k in key_names:
+        tmp = {k:[]}
+        for ele in keywords[k]:
+            tmp[k].extend(ele.split("::"))
+        keywords.update(tmp)
+    json.dump(keywords, open(fp, 'w'), ensure_ascii=False)
+
+
 if __name__ == '__main__':
     # parser2('guangzhouzhufang.csv')
     # ret = common_parser1(['保利世界贸易中心（二期）::恒大山水城146-147号楼（C区）::广园东碧桂园凤凰城凤林苑二期住宅::锦绣御品名苑29-41栋、43-47栋、49-51栋::南沙碧桂园倚荔轩倚荔街7、8、9、10号::保利城花园::恒大山水城(D区)::祈福花园(花明径2、4、6、8、10、12号)::映翠苑::德福河畔花园::信业花园A区::嘉日雅居::新光城市花园二期一街至四街::映翠苑::锦绣半岛银湾西区商铺3'])
-    json_parser('/Users/wwd/PycharmProjects/spider_chrome/data/loupan.json', ['loupan_ls'])
+    json_parser1('/Users/wwd/PycharmProjects/spider_chrome/data/anjuke_city.json', ['city_ls'])
+
     pass

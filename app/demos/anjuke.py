@@ -1,6 +1,7 @@
 # coding=utf-8
 
-from app.Handlers.base_handler import BaseHandler
+import json
+from Handlers.base_handler import BaseHandler
 
 
 class Handler(BaseHandler):
@@ -24,30 +25,37 @@ class Handler(BaseHandler):
                     self.get(url_pattern % index, callback='detail_page')
 
     def detail_page(self):
-        loupan_ret = self.result.get('loupan_ls', [])
-        eles = self.browser.find_elements_by_css_selector(
-                '#container > div.list-contents > div.list-results > div.key-list.imglazyload > div > div > a.lp-name > h3 > span')
-        loupan_ls = [ele.text for ele in eles]
-        loupan_ret.append('::'.join(loupan_ls))
-        self.result.update(
-            {
-                "loupan_ls": loupan_ret
-            }
-        )
+        try:
+            loupan_ret = self.result.get('loupan_ls', [])
+            eles = self.browser.find_elements_by_css_selector(
+                    '#container > div.list-contents > div.list-results > div.key-list.imglazyload > div > div > a.lp-name > h3 > span')
+            loupan_ls = [ele.text for ele in eles]
+            loupan_ret.append('::'.join(loupan_ls))
+            self.result.update(
+                {
+                    "loupan_ls": loupan_ret
+                }
+            )
+        except Exception as e:
+            print(str(e))
+            error_ret = self.result.get('error_ls', [])
+            error_ret.append(str(e)+'\nurl: {}\n'.format(self.browser.current_url))
 
     def pipeline(self):
-        self.save_result(fname='try')
+        self.save_result(fname='anjuke_new')
 
     def main(self):
         self.set_params(project_name='loupan')
-        self.on_start(['https://sz.fang.anjuke.com/loupan/',
-                       'https://sh.fang.anjuke.com/loupan/',
-                       'https://bj.fang.anjuke.com/loupan/'])
+        with open("/Users/wwd/PycharmProjects/spider_chrome/data/anjuke_city.json", 'r') as f:
+            city_dict = json.load(f)
+        city_ls = city_dict["city_ls"]
+        del city_dict
+        self.on_start(city_ls)
         self.pipeline()
         self.browser.close()
 
 
 if __name__ == '__main__':
     Hd = Handler()
-    Hd.main()
+    # Hd.get('http://news.hexun.com/2018-11-29/195364164.html')
     pass

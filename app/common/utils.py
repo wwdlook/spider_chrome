@@ -36,8 +36,7 @@ def time_consumed(f):
 
 def WorkFlow(f):
     def wrapper(ParentModuel, SonModuel, Function, *args, **kwargs):
-
-
+        pass
 
 
 if __name__ == '__main__':
