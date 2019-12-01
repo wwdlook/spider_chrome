@@ -16,6 +16,17 @@ Python3.6
 | get  | 使用ChromeDriver进行GET方法请求，`callback=`字段用于调用处理  请求完页面的自定义函数。当url为空('')时，仅保留当前页面并用于调  用下一步的自动以函数 |
 | save_result  | 保存`self.result`中的结果，路径为该项目下的`data`文件夹|
 
+### 2.2 Processor
+| 函数 |   说明   |
+| ---- | -------- |
+| set_params | 设置参数 |
+| process | 处理函数，具体功能可自行定义 |
+
+###2.2.1 Processor_get_doc
+| 函数 |   说明   |
+| ---- | -------- |
+| process | 取得url页面的文章内容，参数为url: str, time_out: int |
+
 #### 示例
 
 见anjuke.py
